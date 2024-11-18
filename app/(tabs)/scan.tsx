@@ -28,9 +28,8 @@ const EscanearCodigo: React.FC = () => {
   };
 
   const hanldeShareList = (listId: string) => {
-    console.log("SharingList With ID:", listId);
-    router.replace(/(tabs)/confirmaciondecompartido?id=${listId});
-    //router.replace(confirmacioncompartido?id=${listId}?id=${listId});
+    console.log("Sharing List With ID:", listId);
+    router.replace(`/tabs/confirmaciondecompartido?id=${listId}`);
   };
 
   const handleBarCodeScanned = async ({ type, data }: { type: string; data: string }) => {
@@ -66,7 +65,7 @@ const EscanearCodigo: React.FC = () => {
     } else if (list) {
       console.log("list found:", list);
       hanldeShareList(quizId); // Navigate to quiz if found
-      ToastAndroid.show(list found: ${list.listName}, ToastAndroid.LONG);
+      ToastAndroid.show(`list found: ${list.listName}`, ToastAndroid.LONG);
     } else {
       ToastAndroid.show('No list found with this ID.', ToastAndroid.LONG);
     }
