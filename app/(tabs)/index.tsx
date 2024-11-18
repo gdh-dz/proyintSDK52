@@ -11,7 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 import { auth } from '@/firebaseConfig';
 import QRCode from 'react-native-qrcode-svg';
 
-
+//HOLAMUNDO
 /*const [data, setData] = useState("")
 const prefix = Linking.createURL('/')
 const linking = {
@@ -91,8 +91,8 @@ const HomeScreen: React.FC = () => {
       console.error("Error codificando a Base64: ", error);
       return null;
     }
-  };
-  
+  }; 
+
   // Renderiza cada elemento de la lista
   const renderListItem = (list: List) => (
     <View style={styles.listItemContainer} key={list.listName}>
