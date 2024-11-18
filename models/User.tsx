@@ -1,8 +1,8 @@
 // models/User.tsx
 import { QueryDocumentSnapshot } from "firebase/firestore";
  // Ajusta la ruta según tu estructura de carpetas
-import {app} from "../firebaseConfig"
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore"; // Asegúrate de importar las funciones necesarias
+ import { app } from "@/firebaseConfig";
+ import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore"; // Asegúrate de importar las funciones necesarias
 
 const db = getFirestore(app); // Asegúrate de usar la instancia de firebaseApp aquí
 

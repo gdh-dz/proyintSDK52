@@ -1,4 +1,4 @@
-import { auth } from "../firebaseConfig";
+import { auth } from "@/firebaseConfig";
 import { signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { FirebaseError } from "firebase/app"; // Import FirebaseError
 import { onAuthStateChanged } from "firebase/auth";
