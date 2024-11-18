@@ -1,6 +1,6 @@
 // models/Category.tsx
 import { QueryDocumentSnapshot } from "firebase/firestore";
-import { app } from "../firebaseConfig";
+import { app } from "@/firebaseConfig";
 import { getFirestore } from "firebase/firestore";
 const db = getFirestore(app);
 

@@ -1,5 +1,5 @@
 // services/ListService.tsx
-import {db} from "../firebaseConfig"; // Asegúrate de ajustar la ruta
+import { db } from "@/firebaseConfig";
 import { doc, getDoc, setDoc, deleteDoc, updateDoc, collection, query, where, getDocs, arrayUnion, addDoc } from "firebase/firestore";
 import { List } from "../models/Lists";
 

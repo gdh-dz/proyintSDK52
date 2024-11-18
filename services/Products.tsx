@@ -1,5 +1,5 @@
 // services/ProductoListaService.tsx
-import { db } from "../firebaseConfig";
+import { db } from "@/firebaseConfig";
 import { doc, setDoc, deleteDoc, updateDoc, collection, query, where, getDocs,getDoc  } from "firebase/firestore";
 import { ProductoLista } from "../models/ProductsList";
 import { Producto } from "../models/Products";
