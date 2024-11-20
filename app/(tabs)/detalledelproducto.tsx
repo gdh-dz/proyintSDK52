@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, TextInput, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+const router = useRouter();
 
 interface ProductDetails {
     name: string;
@@ -19,6 +21,7 @@ const product: ProductDetails = {
 };
 
 const ProductDetailsScreen: React.FC = () => {
+    const router = useRouter();
     return (
         <View style={styles.container}>
             {/* Circular Product Image */}
@@ -38,8 +41,9 @@ const ProductDetailsScreen: React.FC = () => {
             </View>
 
             {/* Compare Prices Button */}
-            <TouchableOpacity style={styles.compareButton}>
-                <Text style={styles.compareButtonText}>Comparar precios</Text>
+            <TouchableOpacity style={styles.compareButton}
+            onPress={() => router.push('/editarproducto')}>
+                <Text style={styles.compareButtonText}>Editar Producto</Text>
             </TouchableOpacity>
         </View>
     );

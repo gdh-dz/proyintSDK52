@@ -36,7 +36,7 @@ const ProfileScreen: React.FC = () => {
 
       <TouchableOpacity style={styles.editButton} 
       onPress={() => router.push('/editarperfil')}>
-        <Text style={styles.editText}>Editar Perfil</Text>
+        <Text style={styles.editarText}>Editar Perfil</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.logoutButton}>
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     alignItems: 'center',
   },
-  editText: {
+  editarText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
