@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     alignSelf: 'flex-end',
-    backgroundColor: '#D9534F',
+    backgroundColor: '#BE0000',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: 8,
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   saveButton: {
-    backgroundColor: '#6D9F60',
+    backgroundColor: '#2E7D32',
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',

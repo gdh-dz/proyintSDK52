@@ -96,6 +96,24 @@ export default function TabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="pantallalistas"
+        options={{
+          title: 'Listas',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="pantallacolaboracion"
+        options={{
+          title: 'Listas colaborativas',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name={focused ? 'list' : 'list-outline'} color={color} />
+          ),
+        }}
+      />
 
     </Tabs>
 
