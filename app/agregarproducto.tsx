@@ -1,10 +1,12 @@
+import { addProducto } from '@/services/Products';
+import { useNavigation } from '@react-navigation/native'; // Importa el hook para navegar
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Category } from '../models/Category';
 import { getCategorys } from '../services/categorias';
-import { addProducto } from '@/services/Products';
 
 const IconSelectionScreen: React.FC = () => {
+  const navigation = useNavigation();
   const [productName, setProductName] = useState('');
   const [category, setCategory] = useState('');
   const [productimageURL, setProductImageURL] = useState('');
@@ -12,7 +14,6 @@ const IconSelectionScreen: React.FC = () => {
   const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
 
-  // Carga las categorías desde Firebase al montar el componente
   useEffect(() => {
     const loadCategories = async () => {
       const categoryList = await getCategorys();
@@ -21,20 +22,23 @@ const IconSelectionScreen: React.FC = () => {
     loadCategories();
   }, []);
 
-  // Manejador para agregar el producto
   const handleAddProduct = async () => {
-    console.log('Product Info:', { productName, productimageURL, price, selectedIcon });
-
     if (!productName || !selectedIcon || !productimageURL || !price) {
-      Alert.alert('Error', 'Faltan datos. Por favor, completa todos los campos antes de agregar el producto.');
+      Alert.alert(
+        'Error',
+        'Faltan datos. Por favor, completa todos los campos antes de agregar el producto.'
+      );
       return;
     }
 
     try {
       await addProducto(productName, category, productimageURL, parseFloat(price));
-      Alert.alert('Éxito', '¡Producto agregado exitosamente!');
-
-      // Limpia los campos del formulario después de agregar el producto
+      Alert.alert('Éxito', '¡Producto agregado exitosamente!', [
+        {
+          text: 'Aceptar',
+          onPress: () => navigation.goBack(), // Regresa a la pantalla anterior
+        },
+      ]);
       setProductName('');
       setCategory('');
       setPrice('');
@@ -42,7 +46,10 @@ const IconSelectionScreen: React.FC = () => {
       setSelectedIcon(null);
     } catch (error) {
       console.error('Error al agregar el producto:', error);
-      Alert.alert('Error', 'Hubo un problema al agregar el producto. Inténtalo de nuevo.');
+      Alert.alert(
+        'Error',
+        'Hubo un problema al agregar el producto. Inténtalo de nuevo.'
+      );
     }
   };
 
@@ -90,8 +97,6 @@ const IconSelectionScreen: React.FC = () => {
           keyboardType="numeric"
         />
       </View>
-
-      {/* Botón para agregar producto */}
       <TouchableOpacity style={styles.addButton} onPress={handleAddProduct}>
         <Text style={styles.addButtonText}>Agregar Producto</Text>
       </TouchableOpacity>
