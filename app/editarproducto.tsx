@@ -1,11 +1,52 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
-
+import React, { useEffect, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ToastAndroid } from 'react-native';
+import { useSearchParams } from 'expo-router';
+import { getProductById } from '@/services/products'; 
 const EditProductScreen: React.FC = () => {
+  const { id } = useSearchParams<{ id: string }>(); 
+  const [product, setProduct] = useState<any>(null); 
+  const [name, setName] = useState('');
+  const [category, setCategory] = useState('');
+  const [supermarket, setSupermarket] = useState('');
+  const [price, setPrice] = useState('');
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (id) {
+        try {
+          const fetchedProduct = await getProductById(id); // producto
+          if (fetchedProduct) {
+            setProduct(fetchedProduct);
+            setName(fetchedProduct.name);
+            setCategory(fetchedProduct.category);
+            setSupermarket(fetchedProduct.supermarket);
+            setPrice(fetchedProduct.price);
+          } else {
+            ToastAndroid.show('Producto no encontrado', ToastAndroid.LONG);
+          }
+        } catch (error) {
+          ToastAndroid.show('Error al cargar el producto', ToastAndroid.LONG);
+        }
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  const handleSave = () => {
+  
+    console.log("Producto actualizado:", { name, category, supermarket, price });
+    ToastAndroid.show('Cambios guardados', ToastAndroid.SHORT);
+  };
+
+  if (!product) {
+    return <Text>Cargando información del producto...</Text>;
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
         </TouchableOpacity>
         <Text style={styles.title}>Editar producto</Text>
       </View>
@@ -14,38 +55,50 @@ const EditProductScreen: React.FC = () => {
         <Text style={styles.deleteButtonText}>Eliminar producto</Text>
       </TouchableOpacity>
 
-      {/* Product category icons */}
-      <View style={styles.iconsContainer}>
-        <View style={styles.icon} />
-        <View style={styles.icon} />
-        <View style={styles.icon} />
-        <View style={styles.icon} />
-      </View>
-
-      {/* Form */}
+      {/* Formulario para editar el producto */}
       <View style={styles.formContainer}>
         <View style={styles.inputContainer}>
           <Text>Nombre:</Text>
-          <TextInput style={styles.input} placeholder="Escribe aquí" />
+          <TextInput
+            style={styles.input}
+            placeholder="Escribe aquí"
+            value={name}
+            onChangeText={setName}
+          />
         </View>
         <View style={styles.inputContainer}>
           <Text>Categoría:</Text>
-          <TextInput style={styles.input} placeholder="Escribe aquí" />
+          <TextInput
+            style={styles.input}
+            placeholder="Escribe aquí"
+            value={category}
+            onChangeText={setCategory}
+          />
         </View>
         <View style={styles.inputContainer}>
           <Text>Supermercado:</Text>
-          <TextInput style={styles.input} placeholder="Selecciona" />
+          <TextInput
+            style={styles.input}
+            placeholder="Selecciona"
+            value={supermarket}
+            onChangeText={setSupermarket}
+          />
         </View>
         <View style={styles.inputContainer}>
           <Text>Precio:</Text>
-          <TextInput style={styles.input} placeholder="Escribe aquí" keyboardType="numeric" />
+          <TextInput
+            style={styles.input}
+            placeholder="Escribe aquí"
+            keyboardType="numeric"
+            value={String(price)}
+            onChangeText={(text) => setPrice(text)}
+          />
         </View>
       </View>
 
-      <TouchableOpacity style={styles.saveButton}>
+      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <Text style={styles.saveButtonText}>Aceptar cambios</Text>
       </TouchableOpacity>
-      
     </ScrollView>
   );
 };
@@ -79,17 +132,6 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
-  iconsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginVertical: 16,
-  },
-  icon: {
-    width: 60,
-    height: 60,
-    backgroundColor: '#D3D3D3',
-    borderRadius: 30,
-  },
   formContainer: {
     backgroundColor: '#F0F0F0',
     padding: 16,
@@ -116,17 +158,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  navBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    borderTopWidth: 1,
-    borderTopColor: '#CCCCCC',
-    paddingVertical: 8,
-    marginTop: 32,
-  },
-  navItem: {
-    alignItems: 'center',
-  },
 });
 
 export default EditProductScreen;
+
