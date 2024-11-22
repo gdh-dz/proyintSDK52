@@ -1,45 +1,54 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { auth, db } from '@/firebaseConfig'; // Asegúrate de importar correctamente Firebase
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/firebaseConfig'; // Asegúrate de que la configuración sea correcta
 
 const ProfileScreen: React.FC = () => {
   const router = useRouter();
-  const [userData, setUserData] = useState<any>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userPhone, setUserPhone] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Suponiendo que tienes el uid del usuario almacenado en algún lugar (por ejemplo, en el contexto o global state)
-    const userId = 'user-uid'; // Sustituir con el uid real del usuario
-
-    const getUserData = async () => {
+    const fetchUserProfile = async () => {
       try {
-        const docRef = doc(db, 'users', userId); // La colección 'users' y el documento con el uid del usuario
-        const docSnap = await getDoc(docRef);
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          throw new Error('Usuario no autenticado');
+        }
 
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
+        setUserEmail(currentUser.email || 'Correo no disponible'); // Guardamos el correo del usuario
+
+        const userDocRef = doc(db, 'users', currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setUserName(data.name || 'Nombre no disponible');
+          setUserPhone(data.phone || 'Número no disponible');
         } else {
-          Alert.alert('Error', 'No se encontraron datos de usuario');
+          Alert.alert('Error', 'No se encontraron datos del usuario');
         }
       } catch (error) {
-        console.error('Error obteniendo los datos del usuario:', error);
-        Alert.alert('Error', 'Hubo un problema al obtener los datos');
+        console.error('Error al obtener datos del usuario:', error);
+        Alert.alert('Error', 'No se pudo cargar el perfil');
       } finally {
         setLoading(false);
       }
     };
 
-    getUserData();
+    fetchUserProfile();
   }, []);
 
   if (loading) {
-    return <Text>Cargando...</Text>; // O algún componente de carga
-  }
-
-  if (!userData) {
-    return <Text>No se encontraron datos de usuario.</Text>; // Si no se obtienen datos, muestra un mensaje
+    return (
+      <View style={styles.centeredContainer}>
+        <ActivityIndicator size="large" color="#2E7D32" />
+        <Text>Cargando perfil...</Text>
+      </View>
+    );
   }
 
   return (
@@ -48,30 +57,37 @@ const ProfileScreen: React.FC = () => {
       <View style={styles.profileSection}>
         <Text style={styles.sectionTitle}>Tu perfil</Text>
         <Image
-          source={{ uri: userData.profileImage }} // Usa la URL de la imagen del perfil del usuario desde Firebase
+          source={{ uri: 'https://via.placeholder.com/100' }} // Imagen de perfil genérica
           style={styles.profileImage}
         />
-        <Text style={styles.profileName}>{userData.name}</Text> {/* Nombre del usuario */}
+        <Text style={styles.profileName}>{userName || 'Nombre no disponible'}</Text>
+        <Text style={styles.profileEmail}>{userEmail || 'Correo no disponible'}</Text>
+        <Text style={styles.profilePhone}>{userPhone || 'Número no disponible'}</Text>
       </View>
 
       {/* Lists Section */}
       <View style={styles.listsSection}>
-        {userData.lists.map((list: any, index: number) => (
-          <View key={index} style={styles.listCard}>
-            <Image
-              source={{ uri: list.image }} // Imagen de cada lista
-              style={styles.listImage}
-            />
-            <Text style={styles.listName}>{list.name}</Text>
-          </View>
-        ))}
+        <View style={styles.listCard}>
+          <Image
+            source={{ uri: 'https://via.placeholder.com/60' }} // Imagen genérica para la lista
+            style={styles.listImage}
+          />
+          <Text style={styles.listName}>Lista 1</Text>
+        </View>
+        <View style={styles.listCard}>
+          <Image
+            source={{ uri: 'https://via.placeholder.com/60' }} // Imagen genérica para la lista
+            style={styles.listImage}
+          />
+          <Text style={styles.listName}>Lista 2</Text>
+        </View>
       </View>
 
       <TouchableOpacity style={styles.editButton} onPress={() => router.push('/editarperfil')}>
         <Text style={styles.editarText}>Editar Perfil</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.logoutButton}>
+      <TouchableOpacity style={styles.logoutButton} onPress={() => auth.signOut()}>
         <Text style={styles.logoutText}>Cerrar sesión</Text>
       </TouchableOpacity>
     </View>
@@ -83,6 +99,11 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  centeredContainer: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -105,6 +126,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#000',
+  },
+  profileEmail: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#555',
+    marginTop: 5,
+  },
+  profilePhone: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#555',
+    marginTop: 5,
   },
   listsSection: {
     flexDirection: 'row',
