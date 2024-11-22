@@ -1,6 +1,5 @@
 import { logIn } from "@/services/auth"; // Import the login function
 import React, { useState } from "react";
-import { NavigationContainer } from '@react-navigation/native';
 import { View, Text, TextInput, Alert, StyleSheet, Image, TouchableOpacity, Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 
@@ -22,7 +21,9 @@ export default function LoginScreen() {
     try {
       await logIn(email, password); // Call the login function
       Alert.alert("Éxito", "Se ha iniciado sesión");
-     // navigation.navigate("Home"); // Navigate to Explore or your main screen
+
+      // Navegar a la pantalla principal después del login exitoso
+      navigation.navigate("index"); // Aquí se redirige a la pantalla 'Home' o 'index'
     } catch (error) {
       Alert.alert("Error", "No se pudo iniciar la sesión. Intenta de nuevo");
       console.error("Hubo un error iniciando sesión", error);
@@ -75,6 +76,7 @@ export default function LoginScreen() {
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -108,20 +110,20 @@ const styles = StyleSheet.create({
     width: width * 0.8,
     maxWidth: 400,
   },
-  buttonBox:{
+  buttonBox: {
     padding: 10, // This combines paddingHorizontal and paddingVertical
     justifyContent: 'center',
     alignItems: 'center',
     gap: 10,
   },
-  loginswitch:{
-    width: 80, 
+  loginswitch: {
+    width: 80,
     height: 40,
     position: 'absolute',
     borderRadius: 20,
-    backgroundColor: '#5F7F1E', 
+    backgroundColor: '#5F7F1E',
   },
-  signupswitch:{
+  signupswitch: {
     flexDirection: 'row', // Adjust this to 'column' if you want vertical stacking
     paddingHorizontal: 10, // For horizontal padding (0px top/bottom, 10px left/right)
     justifyContent: 'center',
@@ -166,5 +168,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'medium',
   },
-  
 });

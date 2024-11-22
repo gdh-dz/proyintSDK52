@@ -1,41 +1,73 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/firebaseConfig'; // Asegúrate de que la configuración sea correcta
 
 const ProfileScreen: React.FC = () => {
   const router = useRouter();
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // Suponiendo que tienes el uid del usuario almacenado en algún lugar (por ejemplo, en el contexto o global state)
+    const userId = 'user-uid'; // Sustituir con el uid real del usuario
+
+    const getUserData = async () => {
+      try {
+        const docRef = doc(db, 'users', userId); // La colección 'users' y el documento con el uid del usuario
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          setUserData(docSnap.data());
+        } else {
+          Alert.alert('Error', 'No se encontraron datos de usuario');
+        }
+      } catch (error) {
+        console.error('Error obteniendo los datos del usuario:', error);
+        Alert.alert('Error', 'Hubo un problema al obtener los datos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getUserData();
+  }, []);
+
+  if (loading) {
+    return <Text>Cargando...</Text>; // O algún componente de carga
+  }
+
+  if (!userData) {
+    return <Text>No se encontraron datos de usuario.</Text>; // Si no se obtienen datos, muestra un mensaje
+  }
+
   return (
     <View style={styles.container}>
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <Text style={styles.sectionTitle}>Tu perfil</Text>
         <Image
-          source={{ uri: 'https://via.placeholder.com/100' }} // Replace with your profile image URL
+          source={{ uri: userData.profileImage }} // Usa la URL de la imagen del perfil del usuario desde Firebase
           style={styles.profileImage}
         />
-        <Text style={styles.profileName}>Nombre Apellidos</Text>
+        <Text style={styles.profileName}>{userData.name}</Text> {/* Nombre del usuario */}
       </View>
 
       {/* Lists Section */}
       <View style={styles.listsSection}>
-        <View style={styles.listCard}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/60' }} // Replace with your list image URL
-            style={styles.listImage}
-          />
-          <Text style={styles.listName}>Lista 1</Text>
-        </View>
-        <View style={styles.listCard}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/60' }} // Replace with your list image URL
-            style={styles.listImage}
-          />
-          <Text style={styles.listName}>Lista 2</Text>
-        </View>
+        {userData.lists.map((list: any, index: number) => (
+          <View key={index} style={styles.listCard}>
+            <Image
+              source={{ uri: list.image }} // Imagen de cada lista
+              style={styles.listImage}
+            />
+            <Text style={styles.listName}>{list.name}</Text>
+          </View>
+        ))}
       </View>
 
-      <TouchableOpacity style={styles.editButton} 
-      onPress={() => router.push('/editarperfil')}>
+      <TouchableOpacity style={styles.editButton} onPress={() => router.push('/editarperfil')}>
         <Text style={styles.editarText}>Editar Perfil</Text>
       </TouchableOpacity>
 
@@ -62,15 +94,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#000',
-  },
-  editIcon: {
-    position: 'absolute',
-    right: -20,
-    top: -5,
-  },
-  editText: {
-    fontSize: 16,
-    color: '#2E7D32',
   },
   profileImage: {
     width: 100,

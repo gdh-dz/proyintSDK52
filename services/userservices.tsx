@@ -1,51 +1,76 @@
 // services/userService.ts
 import { User } from "@/models/User";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, UserCredential } from "firebase/auth"; // Asegúrate de importar signInWithEmailAndPassword
-import { setDoc, doc } from "firebase/firestore";
-import { app,db } from "@/firebaseConfig";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, UserCredential } from "firebase/auth";
+import { setDoc, doc, getFirestore } from "firebase/firestore";
+import { app } from "@/firebaseConfig";
 
 // Inicializa Firebase Authentication y Firestore usando la instancia de la app
-const auth = getAuth(app); // Usa la instancia de Firebase App
+const auth = getAuth(app);
+const db = getFirestore();
 
 // Función para iniciar sesión
 export const loginUser = async (identifier: string, password: string) => {
   try {
-    // Iniciar sesión con correo electrónico o teléfono
     const userCredential: UserCredential = await signInWithEmailAndPassword(auth, identifier, password);
     const user = userCredential.user;
-    
+
     return {
       uid: user.uid,
       email: user.email,
       // Puedes agregar otros campos del usuario si es necesario
     };
   } catch (error) {
-    // Manejo de errores
-    const errorMessage = (error as Error).message || 'Unknown error occurred';
+    const errorMessage = (error as Error).message || "Unknown error occurred";
     console.error("Error logging in:", error);
     throw new Error(`Error logging in: ${errorMessage}`);
   }
 };
 
 // Función para crear un nuevo usuario
-export async function createUser(email: string, password: string, name: string, phone: string): Promise<{ uid: string; email: string; name: string }> {
+export const createUser = async (
+  email: string,
+  password: string,
+  name: string,
+  phone: string
+): Promise<{ uid: string; email: string; name: string; phone: string }> => {
   try {
     // Crear usuario en Firebase Authentication
     const userCredential: UserCredential = await createUserWithEmailAndPassword(auth, email, password);
     const uid = userCredential.user.uid;
 
     // Crear instancia de usuario y subir a Firestore
-    try {
-      const newUser = new User(email, name);
-      const userDocRef = doc(db, "users", uid);
-      await setDoc(userDocRef, newUser.toFirestore());
-    } catch (error) {
-      throw new Error(`Error registering user: ${error}`); // Lanza un error más específico
-    }
+    const userData = {
+      email,
+      name,
+      phone,
+    };
 
-    return { uid, email, name };
+    await setDoc(doc(db, "users", uid), userData);
+
+    return { uid, email, name, phone };
   } catch (error) {
     console.error("Error creating user:", error);
-    throw new Error(`Error creating user: ${error}`); // Lanza un error más específico
+    const errorMessage = (error as Error).message || "Unknown error occurred";
+    throw new Error(`Error creating user: ${errorMessage}`);
   }
-}
+};
+
+// Función auxiliar para crear usuario sin autenticación (opcional, si solo necesitas Firestore)
+export const createUserInFirestore = async (
+  email: string,
+  name: string,
+  phone: string
+): Promise<{ email: string; name: string; phone: string }> => {
+  try {
+    const userId = email.split("@")[0]; // Generar un ID basado en el correo (puedes usar otro método)
+    const userData = { email, name, phone };
+
+    await setDoc(doc(db, "users", userId), userData);
+
+    return userData;
+  } catch (error) {
+    console.error("Error creating user in Firestore:", error);
+    const errorMessage = (error as Error).message || "Unknown error occurred";
+    throw new Error(`Error creating user in Firestore: ${errorMessage}`);
+  }
+};
