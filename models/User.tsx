@@ -26,7 +26,7 @@ export class User {
     return {
       email: this.email,
       name: this.name,
-      profileImage: this.profileImage, // Incluir profileImage al guardar en Firestore
+      ...(this.profileImage ? { profileImage: this.profileImage } : {}),
     };
   }
 
