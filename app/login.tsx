@@ -1,14 +1,13 @@
 import { logIn } from "@/services/auth"; // Import the login function
 import React, { useState } from "react";
-import { NavigationContainer } from '@react-navigation/native';
 import { View, Text, TextInput, Alert, StyleSheet, Image, TouchableOpacity, Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { router } from "expo-router";
+import { router, useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
 export default function LoginScreen() {
-  const navigation = useNavigation(); // Initialize navigation
+  const router = useRouter();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -22,9 +21,10 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await logIn(email, password); // Call the login function
-      Alert.alert("Éxito", "Se ha iniciado sesión");
       router.navigate('/(tabs)')
-     // navigation.navigate("Home"); // Navigate to Explore or your main screen
+      Alert.alert("Éxito", "Se ha iniciado sesión");
+      
+
     } catch (error) {
       Alert.alert("Error", "No se pudo iniciar la sesión. Intenta de nuevo");
       console.error("Hubo un error iniciando sesión", error);
@@ -41,9 +41,10 @@ export default function LoginScreen() {
         resizeMode="cover"
       />
       <View style={styles.outerFrame}>
-        <TouchableOpacity style={styles.switchButton}>
-          <Text style={styles.switchButtonText}>Log In / Sign Up</Text>
-        </TouchableOpacity>
+      <TouchableOpacity style={styles.switchButton} 
+      onPress={() => router.push('/signup')}>
+      <Text style={styles.switchButtonText}>Log In / Sign Up</Text>
+      </TouchableOpacity>
         <Text style={styles.title}>¡Bienvenido!</Text>
         <View style={styles.inputContainer}>
           <TextInput
