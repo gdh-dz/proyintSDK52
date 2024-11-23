@@ -64,7 +64,20 @@ export async function modifyProductoInList(productoListaId: string, updatedData:
 // Marcar producto como comprado en una lista
 export async function markProductoAsComprado(productoListaId: string): Promise<void> {
   const docRef = doc(db, "ProductosListas", productoListaId);
-  await updateDoc(docRef, { isComprado: true });
+
+  // Obtener el documento actual
+  const docSnapshot = await getDoc(docRef);
+
+  if (docSnapshot.exists()) {
+    const currentData = docSnapshot.data();
+    const currentIsComprado = currentData.isComprado;
+
+    // Cambiar de true a false o de false a true
+    await updateDoc(docRef, { isComprado: !currentIsComprado });
+    console.log("cambiado successfully")
+  } else {
+    console.error("El documento no existe");
+  }
 }
 
 // Eliminar un producto de una lista

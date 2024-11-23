@@ -16,7 +16,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { List } from '@/models/Lists';
 import { getListById } from '@/services/lists';
 import { Producto } from '@/models/Products';
-import { addProductoToList, getProductoById, getProductos, getProductosByListId } from '@/services/Products';
+import { addProductoToList, getProductoById, getProductos, getProductosByListId, markProductoAsComprado } from '@/services/Products';
 import { ProductoLista } from '@/models/ProductsList';
 export default function ListScreen(){
 
@@ -43,7 +43,8 @@ const { id } = useLocalSearchParams();
   // Ejecuta fetchList al cargar el componente o cuando cambia el ID
   
   const [catalogProducts, setcatalogProducts] = useState<Producto[]>([]); // Estado de carga
-  
+  const [loadChanges, setLoadChanges] = useState<boolean>(); // Estado de carga
+
   
   
   
@@ -103,13 +104,19 @@ const { id } = useLocalSearchParams();
     }
   };
   
-  
+  const [selectedProducts, setSelectedProducts] = useState<{ [id: string]: boolean }>({});
+
   useEffect(() => {
     if (products.length > 0) {
       loadDetailedProducts(products); // Llama al método con la lista de productos
     }
-  }, [products]);
+  }, [products,loadChanges]);
 
+  useEffect(() => {
+    if (products.length > 0) {
+      loadDetailedProducts(products); // Llama al método con la lista de productos
+    }
+  }, [loadChanges]);
 
   const router = useRouter();
   const [search, setSearch] = useState('');
@@ -117,14 +124,28 @@ const { id } = useLocalSearchParams();
   const [isModalVisible, setModalVisible] = useState(false);
 
 
-  const [selectedProducts, setSelectedProducts] = useState<{ [id: string]: boolean }>({});
 
-  const toggleSelection = (id: string) => {
-    setSelectedProducts((prevSelected) => ({
-      ...prevSelected,
-      [id]: !prevSelected[id], // Alterna el estado de selección
+  const toggleSelection = async (id: string) => {
+    
+      try {
+    
+    // Update the selectedProducts state first to reflect the UI change
+    setSelectedProducts((prevState) => ({
+      ...prevState,
+      [id]: !prevState[id], // Toggle selection for the specific product
     }));
-  };
+    
+    // Update the 'isComprado' field for the corresponding product
+    // Now call the API to update the product's purchase status in the backend
+    await markProductoAsComprado(id);
+  } catch (error) {
+    console.error(`Error updating the product with ID ${id}:`, error);
+  } finally {
+  }
+};
+  
+
+// Función para actualizar el estado en Firestore
 
   const totalSelected = detailedProducts.reduce(
     (total, product) =>

@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator} from 'react-native';
 import { router, useRouter } from 'expo-router';
 import { getUserIdFromSession } from '@/services/auth';
 import { logOut } from '@/services/auth';
+import { getUserById } from '@/services/userservices';
 
 const handleLogout = async () => {
   try {
