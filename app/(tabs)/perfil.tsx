@@ -1,41 +1,91 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
+import { getUserIdFromSession } from '@/services/auth';
+import { getUserById } from '@/services/userservices';
 
 const ProfileScreen: React.FC = () => {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const userId = await getUserIdFromSession();
+        if (userId) {
+          const userData = await getUserById(userId);
+          setUser(userData);
+        } else {
+          setUser(null); // Redirige al login si no hay usuario
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#2E7D32" />
+      </View>
+    );
+  }
+
+  if (!user) {
+    return (
+      <View style={styles.container}>
+        <Text>No se encontró información del usuario.</Text>
+        <TouchableOpacity style={styles.logoutButton} onPress={() => router.push('/login')}>
+          <Text style={styles.logoutText}>Ir a Login</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  const navigateUserEdit = (userId: string) => {
+    router.push(`/editarperfil?id=${userId}`);
+  };
+
   return (
     <View style={styles.container}>
       {/* Profile Section */}
       <View style={styles.profileSection}>
         <Text style={styles.sectionTitle}>Tu perfil</Text>
         <Image
-          source={{ uri: 'https://via.placeholder.com/100' }} // Replace with your profile image URL
+          source={{ uri: user.profileImage || 'https://via.placeholder.com/100' }} // URL de imagen del perfil
           style={styles.profileImage}
         />
-        <Text style={styles.profileName}>Nombre Apellidos</Text>
+        <Text style={styles.profileName}>{user.name || 'Nombre Apellidos'}</Text>
       </View>
 
       {/* Lists Section */}
       <View style={styles.listsSection}>
         <View style={styles.listCard}>
           <Image
-            source={{ uri: 'https://via.placeholder.com/60' }} // Replace with your list image URL
+            source={{ uri: 'https://via.placeholder.com/60' }} // Cambia por tus imágenes
             style={styles.listImage}
           />
           <Text style={styles.listName}>Lista 1</Text>
         </View>
         <View style={styles.listCard}>
           <Image
-            source={{ uri: 'https://via.placeholder.com/60' }} // Replace with your list image URL
+            source={{ uri: 'https://via.placeholder.com/60' }} // Cambia por tus imágenes
             style={styles.listImage}
           />
           <Text style={styles.listName}>Lista 2</Text>
         </View>
       </View>
 
-      <TouchableOpacity style={styles.editButton} 
-      onPress={() => router.push('/editarperfil')}>
+      <TouchableOpacity
+        style={styles.editButton}
+        onPress={() => navigateUserEdit(user.id)} // Llama la función con el ID del usuario
+      >
         <Text style={styles.editarText}>Editar Perfil</Text>
       </TouchableOpacity>
 
@@ -45,6 +95,7 @@ const ProfileScreen: React.FC = () => {
     </View>
   );
 };
+
 
 const styles = StyleSheet.create({
   container: {
@@ -62,15 +113,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#000',
-  },
-  editIcon: {
-    position: 'absolute',
-    right: -20,
-    top: -5,
-  },
-  editText: {
-    fontSize: 16,
-    color: '#2E7D32',
   },
   profileImage: {
     width: 100,
