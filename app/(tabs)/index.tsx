@@ -16,6 +16,7 @@ import { auth } from "@/firebaseConfig";
 import { getUserIdFromSession } from "../../services/auth";
 import { getIndividualListsByUserId, getCollaborativeListsByUserId, getRandomIconUrl } from "../../services/lists";
 import { List } from "../../models/Lists";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const { width } = Dimensions.get("window");
 
@@ -118,7 +119,9 @@ const HomeScreen: React.FC = () => {
         </View>
         <View style={styles.listsContainer}>
           <View style={styles.sectionFrame}>
-            <Text style={styles.sectionTag}>Mis listas</Text>
+          <View style={styles.tagContainer}>
+                <Text style={styles.sectionTag}>Mis Listas</Text>
+              </View>
             {loading ? (
               <Text>Cargando...</Text>
             ) : (
@@ -133,6 +136,27 @@ const HomeScreen: React.FC = () => {
             )}
           </View>
         </View>
+        <View style={styles.listsContainer}>
+        <View style={styles.sectionFrame}>
+              <View style={styles.tagContainer}>
+                <Text style={styles.sectionTag}>Listas compartidas</Text>
+              </View>
+              <FlatList
+                horizontal
+                data={ourLists}
+                renderItem={({ item, index }) => renderListItem(item, index)} // Pasar índice.
+                keyExtractor={(item, index) => item.id ?? `default-key-${index}`} // Generar clave única.
+                contentContainerStyle={styles.carouselContainer}
+                showsHorizontalScrollIndicator={false}
+              />
+            </View>
+            </View>
+
+          {/* Botón "Crear lista" */}
+          <TouchableOpacity style={styles.createListButton} onPress={() => router.push('/new-list')}>
+          <Ionicons name="add-circle-outline" size={24} color="#2E7D32" />
+            <Text style={styles.createListButtonText}>Crear lista</Text>
+          </TouchableOpacity>
       </SafeAreaView>
     </>
   );
@@ -221,7 +245,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff', // Fondo blanco para el botón
     paddingVertical: 20,
     paddingHorizontal: 20,
-    borderRadius: 20,
     marginTop: 10, // Acercar el botón a las listas
     alignItems: 'center',
     justifyContent: 'center',

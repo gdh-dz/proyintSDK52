@@ -29,7 +29,7 @@ const EscanearCodigo: React.FC = () => {
 
   const hanldeShareList = (listId: string) => {
     console.log("Sharing List With ID:", listId);
-    router.replace(`/(tabs)/confirmaciondecompartido?id=${listId}`);
+    router.replace(`/confirmaciondecompartido?id=${listId}`);
     //    router.replace(`/tabs/confirmaciondecompartido?id=${listId}`);
 
   };
