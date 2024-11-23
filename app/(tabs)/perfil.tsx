@@ -2,24 +2,61 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator} from 'react-native';
 import { router, useRouter } from 'expo-router';
 import { getUserIdFromSession } from '@/services/auth';
-import { logOut } from '@/services/auth';
+import {  logOut } from '@/services/auth';
 import { getUserById } from '@/services/userservices';
-
-const handleLogout = async () => {
-  try {
-    await logOut();
-    console.log("Sesión cerrada", "Has salido exitosamente");
-    router.push('/login');
-  } catch (error) {
-    console.error("Error al cerrar sesión:", error);
-    console.log("Error", "Hubo un problema al cerrar la sesión. Inténtalo de nuevo.");
-  }
-};
+import { getCollaborativeListsByUserId, getIndividualListsByUserId, getRandomIconUrl } from '@/services/lists';
+import { List } from '../../models/Lists';
+import { auth } from '@/firebaseConfig';
 
 const ProfileScreen: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [myLists, setMyLists] = useState<List[]>([]);
+  const [ourLists, setOurLists] = useState<List[]>([]);
+  const [iconsMap, setIconsMap] = useState<Record<string, string>>({}); // Almacena los íconos aleatorios
+
+  // Obtener listas del usuario
+  const fetchIndividualLists = async (userId: string) => {
+    try {
+      const lists = await getIndividualListsByUserId(userId);
+      setMyLists(lists);
+      await fetchIconsForLists(lists); // Llama a fetchIconsForLists para obtener los íconos
+    } catch (error) {
+      console.error("Error fetching individual lists:", error);
+    }
+  };
+
+  // Obtener íconos aleatorios para cada lista
+  const fetchIconsForLists = async (lists: List[]) => {
+    const newIconsMap: Record<string, string> = {};
+    for (let i = 0; i < lists.length; i++) {
+      const list = lists[i];
+      const iconUrl = await getRandomIconUrl(); // Llama al servicio para obtener un ícono aleatorio
+      const key = list.id ?? `generated-key-${i}`; // Usa el ID de la lista o genera un key único
+      newIconsMap[key] = iconUrl || ""; // Asocia el ícono a la lista
+    }
+    setIconsMap((prev) => ({ ...prev, ...newIconsMap })); // Actualiza el estado con los íconos obtenidos
+  };
+
+  // Obtener listas al iniciar
+  useEffect(() => {
+    const fetchLists = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userId = await getUserIdFromSession();
+        if (userId) {
+          try {
+            await fetchIndividualLists(userId);
+          } catch (error) {
+            console.error("Error fetching lists:", error);
+          }
+        }
+      }
+    };
+    fetchLists();
+  }, []);
+
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -78,20 +115,15 @@ const ProfileScreen: React.FC = () => {
 
       {/* Lists Section */}
       <View style={styles.listsSection}>
-        <View style={styles.listCard}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/60' }} // Cambia por tus imágenes
-            style={styles.listImage}
-          />
-          <Text style={styles.listName}>Lista 1</Text>
-        </View>
-        <View style={styles.listCard}>
-          <Image
-            source={{ uri: 'https://via.placeholder.com/60' }} // Cambia por tus imágenes
-            style={styles.listImage}
-          />
-          <Text style={styles.listName}>Lista 2</Text>
-        </View>
+        {myLists.map((list, index) => (
+          <View key={list.id || `list-${index}`} style={styles.listCard}>
+            <Image
+              source={{ uri: iconsMap[list.id ?? `generated-key-${index}`] || 'https://via.placeholder.com/60' }}
+              style={styles.listImage}
+            />
+            <Text style={styles.listName}>{list.listName}</Text>
+          </View>
+        ))}
       </View>
 
       <TouchableOpacity
@@ -100,13 +132,24 @@ const ProfileScreen: React.FC = () => {
       >
         <Text style={styles.editarText}>Editar Perfil</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.logoutButton}  onPress={handleLogout}>
+      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutText}>Cerrar sesión</Text>
-        
       </TouchableOpacity>
     </View>
   );
 };
+
+const handleLogout = async () => {
+  try {
+    await logOut();
+    console.log("Sesión cerrada", "Has salido exitosamente");
+    router.push('/login');
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+    console.log("Error", "Hubo un problema al cerrar la sesión. Inténtalo de nuevo.");
+  }
+};
+ 
 
 
 const styles = StyleSheet.create({
@@ -189,3 +232,11 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
+function fetchIconsForLists(lists: import("../../models/Lists").List[]) {
+  throw new Error('Function not implemented.');
+}
+
+function setLoading(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+
