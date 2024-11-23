@@ -21,7 +21,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await logIn(email, password); // Call the login function
-      router.navigate('/(tabs)/perfil')
+      router.navigate('/(tabs)')
       Alert.alert("Éxito", "Se ha iniciado sesión");
       
 
