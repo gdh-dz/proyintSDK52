@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { NavigationContainer } from '@react-navigation/native';
 import { View, Text, TextInput, Alert, StyleSheet, Image, TouchableOpacity, Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
+import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
@@ -22,6 +23,7 @@ export default function LoginScreen() {
     try {
       await logIn(email, password); // Call the login function
       Alert.alert("Éxito", "Se ha iniciado sesión");
+      router.navigate('/(tabs)')
      // navigation.navigate("Home"); // Navigate to Explore or your main screen
     } catch (error) {
       Alert.alert("Error", "No se pudo iniciar la sesión. Intenta de nuevo");
