@@ -1,31 +1,36 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, ToastAndroid } from 'react-native';
-import { useSearchParams } from 'expo-router';
-import { getProductById } from '@/services/products'; 
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { router, SearchParams, useLocalSearchParams } from 'expo-router';
+import { getProductoById } from '@/services/Products';
+
 const EditProductScreen: React.FC = () => {
-  const { id } = useSearchParams<{ id: string }>(); 
+  const { id } = useLocalSearchParams();
+
   const [product, setProduct] = useState<any>(null); 
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [supermarket, setSupermarket] = useState('');
   const [price, setPrice] = useState('');
+  const idString = Array.isArray(id) ? id[0] : id;
+
 
   useEffect(() => {
     const fetchProduct = async () => {
       if (id) {
         try {
-          const fetchedProduct = await getProductById(id); // producto
+          const fetchedProduct = await getProductoById(idString  );
+          console.log(fetchedProduct) // producto
           if (fetchedProduct) {
             setProduct(fetchedProduct);
-            setName(fetchedProduct.name);
-            setCategory(fetchedProduct.category);
-            setSupermarket(fetchedProduct.supermarket);
-            setPrice(fetchedProduct.price);
+            setName(fetchedProduct.nombre || ''); // Asigna un valor válido
+            setCategory(fetchedProduct.categoria || ''); // Asigna un valor válido
+            setPrice(fetchedProduct.precio ? String(fetchedProduct.precio) : '');
           } else {
-            ToastAndroid.show('Producto no encontrado', ToastAndroid.LONG);
+            console.log('Producto no encontrado');
           }
         } catch (error) {
-          ToastAndroid.show('Error al cargar el producto', ToastAndroid.LONG);
+          console.log('Error al cargar el producto');
+
         }
       }
     };
@@ -36,7 +41,8 @@ const EditProductScreen: React.FC = () => {
   const handleSave = () => {
   
     console.log("Producto actualizado:", { name, category, supermarket, price });
-    ToastAndroid.show('Cambios guardados', ToastAndroid.SHORT);
+    console.log('Cambios guardados');
+
   };
 
   if (!product) {

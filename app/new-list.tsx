@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Image, Modal, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { getProductos } from '../services/Products'; // Asegúrate de colocar la ruta correcta al servicio
+import { getProductos } from '@/services/Products'; // Asegúrate de colocar la ruta correcta al servicio
 import { Producto } from '@/models/Products';
 import { createList } from '@/services/lists';
 import { List } from '@/models/Lists';
+import { useRouter } from 'expo-router';
 
 const CrearNuevaLista = () => {
   const [nombreLista, setNombreLista] = useState('');
@@ -15,6 +16,7 @@ const CrearNuevaLista = () => {
   const [productos, setProductos] = useState<Producto[]>([]); // Estado para los productos
   const [selectedProductos, setSelectedProductos] = useState<Producto[]>([]); // Estado para productos seleccionados
 
+  const router = useRouter();
   const toggleSwitch = () => setIsShared(previousState => !previousState);
   const toggleSelectProducto = (producto: Producto) => {
     setSelectedProductos(prev =>
@@ -122,7 +124,9 @@ const handleCreateList = async () => {
         numColumns={4} // 4 columnas
         contentContainerStyle={styles.iconContainer}
       />
-      <TouchableOpacity style={styles.addButton}>
+      <TouchableOpacity style={styles.addButton} onPress={() => {
+        router.navigate("/agregarproducto");
+      }}>
         <Text style={styles.addButtonText}>Nuevo producto</Text>
       </TouchableOpacity>
 
@@ -288,7 +292,6 @@ const styles = StyleSheet.create({
   modalText: {
     marginBottom: 15,
     textAlign: 'center',
-    color: 'red',
   },
   backButton: {
     alignSelf: 'flex-start',
