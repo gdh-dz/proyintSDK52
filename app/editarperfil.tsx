@@ -1,22 +1,55 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { router, useLocalSearchParams } from 'expo-router';
+import { getUserById, updateUserProfile } from '@/services/userservices';
+import { User } from '@/models/User';
 
 const EditProfileScreen: React.FC = () => {
-  const [name, setName] = React.useState<string>('');
-  const [email, setEmail] = React.useState<string>('');
-  const [phone, setPhone] = React.useState<string>('');
-  const [profileImage, setProfileImage] = React.useState<string | null>(null);
+  const [user, setUser] = useState<User>();
+  const [name, setName] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
-  const [validName, setValidName] = React.useState<Boolean>(true);
-  const [validEmail, setValidEmail] = React.useState<Boolean>(true);
-  const [validPhone, setValidPhone] = React.useState<Boolean>(true);
+  const [validName, setValidName] = useState<Boolean>(true);
+  const [validEmail, setValidEmail] = useState<Boolean>(true);
+
+  const { id } = useLocalSearchParams();
+  const idString = Array.isArray(id) ? id[0] : id;
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (idString) {
+        try {
+          const fetchedUser = await getUserById(idString);
+          if (fetchedUser) {
+            setUser(fetchedUser);
+          } else {
+            console.log('Usuario no encontrado');
+          }
+        } catch (error) {
+          console.log('Error al cargar el usuario:', error);
+        }
+      }
+    };
+
+    fetchUser();
+  }, [idString]);
+
+  // Actualizar los valores de los inputs cuando el usuario es cargado
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setEmail(user.email || '');
+      setProfileImage(user.profileImage || null);
+    }
+  }, [user]);
 
   const pickImage = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (!permissionResult.granted) {
-      alert("WiseMarket necesita permiso para acceder a la galería");
+      console.log("WiseMarket necesita permiso para acceder a la galería");
       return;
     }
 
@@ -28,48 +61,35 @@ const EditProfileScreen: React.FC = () => {
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
-      setProfileImage(result.assets[0].uri); 
+      setProfileImage(result.assets[0].uri);
     }
   };
 
-  const saveData = () => {
-    if (!name || !email || !phone) {
-      alert('Faltan datos');
-    } else {
-      if (validName && validEmail && validPhone) {
-        alert('¡Guardado!');
-        
-        
-        setName('');
-        setEmail('');
-        setPhone('');
-        setProfileImage(null);
-      } else {
-        alert('Datos incorrectos');
+  const saveData = async () => {
+  if (!name || !email) {
+    console.log('Faltan datos');
+  } else {
+    if (validName && validEmail) {
+      try {
+        // Guardar la imagen de perfil y los datos del usuario en Firestore
+        const updatedUser = new User(email, name, user?.id, profileImage || undefined );
+        await updateUserProfile(updatedUser); // Este método debe actualizar Firestore con la nueva imagen
+        console.log('¡Guardado!');
+        router.navigate('/(tabs)/perfil')
+      } catch (error) {
+        console.error('Error al guardar los datos:', error);
+        console.log('Hubo un problema al guardar los datos.');
       }
-    }
-  };
-
-  React.useEffect(() => {
-    if (name.length < 10) {
-      setValidName(false);
     } else {
-      setValidName(true);
+      console.log('Datos incorrectos');
     }
+  }
+};
 
-    if(email.indexOf('@') < 0) {
-      setValidEmail(false);
-    } else {
-      setValidEmail(true);
-    }
-
-    if(phone.length !== 10) {
-      setValidPhone(false);
-    } else {
-      setValidPhone(true);
-    }
-      
-  }, [name, email, phone]);
+  useEffect(() => {
+    setValidName(name.length >= 0);
+    setValidEmail(email.includes('@'));
+  }, [name, email]);
 
   return (
     <View style={styles.container}>
@@ -86,7 +106,7 @@ const EditProfileScreen: React.FC = () => {
       {/* Name Field */}
       <Text style={styles.label}>Nombre</Text>
       <TextInput
-        style={validName? styles.input : styles.inputError}
+        style={validName ? styles.input : styles.inputError}
         value={name}
         onChangeText={setName}
         placeholder="Nombre Apellidos"
@@ -95,25 +115,13 @@ const EditProfileScreen: React.FC = () => {
       {/* Email Field */}
       <Text style={styles.label}>Correo electrónico</Text>
       <TextInput
-        style={validEmail? styles.input : styles.inputError}
+        style={validEmail ? styles.input : styles.inputError}
         value={email}
         onChangeText={setEmail}
         keyboardType="email-address"
         placeholder="correo@gmail.com"
       />
-      <TouchableOpacity>
-        <Text style={styles.changePasswordText}>Cambiar contraseña</Text>
-      </TouchableOpacity>
-
-      {/* Phone Field */}
-      <Text style={styles.label}>Teléfono</Text>
-      <TextInput
-        style={validPhone? styles.input : styles.inputError}
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-        placeholder="+52 00 0000 0000"
-      />
+      
 
       {/* Save Button */}
       <TouchableOpacity style={styles.saveButton} onPress={saveData}>

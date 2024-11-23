@@ -57,3 +57,11 @@ export async function getUserById(userID: string): Promise<User | null> {
   const docSnap = await getDoc(docRef);
   return docSnap.exists() ? User.fromFirestore(docSnap) : null;
 }
+
+export async function updateUserProfile (user: User) {
+  if (!user.id) throw new Error('User ID is required');
+  
+  const userRef = doc(db, "users", user.id);
+  
+  await setDoc(userRef, user.toFirestore(), { merge: true });
+};

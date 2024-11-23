@@ -96,7 +96,7 @@ const HomeScreen: React.FC = () => {
               <Image
                 source={{ uri: iconUrl }}
                 style={styles.iconImage}
-                resizeMode="contain"
+                resizeMode="cover"
               />
             )}
           </View>
@@ -181,8 +181,8 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Centrar contenido horizontalmente
   },
   listFrame: {
-    width: 50, // Ancho del marco
-    height: 50, // Alto del marco
+    width: 180, // Ancho del marco
+    height: 100, // Alto del marco
     backgroundColor: "#f0f0f0", // Color de fondo (opcional)
     justifyContent: "center",
     alignItems: "center",
