@@ -28,7 +28,10 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
+      <Stack screenOptions={{
+              // Hide the header for all other routes.
+              headerShown: false,
+            }}>
         <Stack.Screen name="agregarproducto" options={{ title: "Mis productos" }} />
         <Stack.Screen name="IconSelectionScreen" options={{ title: "Agregar Producto" }} />
 

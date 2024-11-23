@@ -1,112 +1,114 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, StyleSheet, FlatList, Dimensions, SafeAreaView, StatusBar, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter, router } from 'expo-router';
-import { getUserIdFromSession } from '../../services/auth'; // Asegúrate de importar la función
-import { getIndividualListsByUserId, getCollaborativeListsByUserId} from '../../services/lists'; // Asegúrate de importar la función
-import { List } from '../../models/Lists';
-const { width } = Dimensions.get('window');
-import * as Linking from "expo-linking";
-import { useNavigation } from '@react-navigation/native';
-import { auth } from '@/firebaseConfig';
-import QRCode from 'react-native-qrcode-svg';
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TextInput,
+  StyleSheet,
+  FlatList,
+  Dimensions,
+  SafeAreaView,
+  StatusBar,
+  TouchableOpacity,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { auth } from "@/firebaseConfig";
+import { getUserIdFromSession } from "../../services/auth";
+import { getIndividualListsByUserId, getCollaborativeListsByUserId, getRandomIconUrl } from "../../services/lists";
+import { List } from "../../models/Lists";
 
-//HOLAMUNDO
-/*const [data, setData] = useState("")
-const prefix = Linking.createURL('/')
-const linking = {
-  prefixes: [prefix],
-  config : {
-    screens:{
-      Home: "index"
-    }
-  }
-}
-
-function handleDeepLink(event: { url: string; }){
-  const parsedData = Linking.parse(event.url);
-  setData(parsedData.path || "")
-}
-useEffect (() => {
-  const subscription = Linking.addEventListener('url', handleDeepLink);
-  return () => subscription.remove();
-}, [])
-*/
+const { width } = Dimensions.get("window");
 
 const HomeScreen: React.FC = () => {
   const router = useRouter();
-  const [myLists, setMyLists] = useState<List[]>([]);  // Estado para las listas del usuario
-  const [ourLists, setOurLists] = useState<List[]>([]);  // Estado para las listas del usuario
+  const [myLists, setMyLists] = useState<List[]>([]);
+  const [ourLists, setOurLists] = useState<List[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [iconsMap, setIconsMap] = useState<Record<string, string>>({}); // Almacena los íconos aleatorios
 
-  const [loading, setLoading] = useState<boolean>(true); // Estado de carga
-
+  // Obtener listas del usuario
   const fetchIndividualLists = async (userId: string) => {
     try {
       const lists = await getIndividualListsByUserId(userId);
       setMyLists(lists);
+      fetchIconsForLists(lists);
     } catch (error) {
-      console.error('Error fetching individual lists:', error);
-    } finally {
-      setLoading(false);
+      console.error("Error fetching individual lists:", error);
     }
   };
 
-  // Función para obtener las listas colaborativas
+  // Obtener listas colaborativas
   const fetchCollaborativeLists = async (userId: string) => {
     try {
       const lists = await getCollaborativeListsByUserId(userId);
-
-      console.log(userId)
       setOurLists(lists);
+      fetchIconsForLists(lists);
     } catch (error) {
-      console.error('Error fetching collaborative lists:', error);
-    } finally {
-      setLoading(false);
+      console.error("Error fetching collaborative lists:", error);
     }
   };
 
-  // Listener para autenticación
+  // Obtener íconos aleatorios para cada lista
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         const userId = await getUserIdFromSession();
         if (userId) {
-          setLoading(true); // Iniciar carga
+          setLoading(true);
           await fetchIndividualLists(userId);
           await fetchCollaborativeLists(userId);
+          setLoading(false);
         }
       } else {
         setMyLists([]);
         setOurLists([]);
       }
     });
-
     return unsubscribe;
   }, []);
-  const encodeBase64 = (data: string | undefined) => {
-    try {
-      const decodedData = btoa(data ?? ""); // Usa una cadena vacía si `data` es undefined
-      return decodedData;
-    } catch (error) {
-      console.error("Error codificando a Base64: ", error);
-      return null;
-    }
-  }; 
 
-  // Renderiza cada elemento de la lista
-  const renderListItem = (list: List) => (
-    <View style={styles.listItemContainer} key={list.listName}>
-      <View style={styles.listFrame} />
-      <Text style={styles.listText}>{list.listName}</Text>
-      <QRCode value={encodeBase64(list.id ?? undefined) ?? ""} size={270} />
-    </View>
-  );
+  const handleShareList = (listId: string) => {
+    router.push(`/pantallalistas?id=${listId}`);
+  };
+
+  const fetchIconsForLists = async (lists: List[]) => {
+    const newIconsMap: Record<string, string> = {};
+    for (let i = 0; i < lists.length; i++) {
+      const list = lists[i];
+      const iconUrl = await getRandomIconUrl();
+      const key = list.id ?? `generated-key-${i}`; // Usar list.id si existe; de lo contrario, genera una clave única.
+      newIconsMap[key] = iconUrl || ""; // Asocia un ícono a cada lista.
+    }
+    setIconsMap((prev) => ({ ...prev, ...newIconsMap })); // Agrega los íconos al estado.
+  };
+
+  const renderListItem = (list: List, index: number) => {
+    const key = list.id ?? `generated-key-${index}`; // Obtén la clave única para esta lista.
+    const iconUrl = iconsMap[key]; // Obtén el ícono correspondiente.
+
+    return (
+      <TouchableOpacity onPress={() => handleShareList(list.id ?? "")}>
+        <View style={styles.listItemContainer}>
+          <View style={styles.listFrame}>
+            {iconUrl && (
+              <Image
+                source={{ uri: iconUrl }}
+                style={styles.iconImage}
+                resizeMode="contain"
+              />
+            )}
+          </View>
+          <Text style={styles.listText}>{list.listName}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <>
       <StatusBar barStyle="light-content" backgroundColor="#256847" />
       <SafeAreaView style={styles.container}>
-        {/* Frame que contiene la barra de búsqueda */}
         <View style={styles.searchFrame}>
           <TextInput
             style={styles.searchBar}
@@ -114,53 +116,22 @@ const HomeScreen: React.FC = () => {
             placeholderTextColor="#A9A9A9"
           />
         </View>
-
-        {/* Contenedor para las secciones de listas agrupadas en un frame */}
         <View style={styles.listsContainer}>
-          <View style={styles.listSectionsContainer}>
-            {/* Frame de "Mis listas" */}
-            <View style={styles.sectionFrame}>
-              <View style={styles.tagContainer}>
-                <Text style={styles.sectionTag}>Mis listas</Text>
-              </View>
-              
-              {loading ? (
-                <Text>Cargando...</Text>
-              ) : myLists.length === 0 ? (
-                <Text>No tienes listas.</Text>
-              ) : (
-                <FlatList
-                  horizontal
-                  data={myLists}
-                  renderItem={({ item }) => renderListItem(item)}
-                  keyExtractor={(item) => item.listName ?? 'default-key'}
-                  contentContainerStyle={styles.carouselContainer}
-                  showsHorizontalScrollIndicator={false}
-                />
-              )}
-            </View>
-
-            {/* Frame de "Listas compartidas" */}
-            <View style={styles.sectionFrame}>
-              <View style={styles.tagContainer}>
-                <Text style={styles.sectionTag}>Listas compartidas</Text>
-              </View>
+          <View style={styles.sectionFrame}>
+            <Text style={styles.sectionTag}>Mis listas</Text>
+            {loading ? (
+              <Text>Cargando...</Text>
+            ) : (
               <FlatList
                 horizontal
-                data={ourLists}
-                renderItem={({ item }) => renderListItem(item)}
-                keyExtractor={(item) => item.listName ?? 'default-key' }
+                data={myLists}
+                renderItem={({ item, index }) => renderListItem(item, index)} // Pasar índice.
+                keyExtractor={(item, index) => item.id ?? `default-key-${index}`} // Generar clave única.
                 contentContainerStyle={styles.carouselContainer}
                 showsHorizontalScrollIndicator={false}
               />
-            </View>
+            )}
           </View>
-
-          {/* Botón "Crear lista" */}
-          <TouchableOpacity style={styles.createListButton} onPress={() => router.push('/new-list')}>
-          <Ionicons name="add-circle-outline" size={24} color="#2E7D32" />
-            <Text style={styles.createListButtonText}>Crear lista</Text>
-          </TouchableOpacity>
         </View>
       </SafeAreaView>
     </>
@@ -184,6 +155,19 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff', // Fondo blanco para el contenedor de listas
     paddingVertical: 10, // Espacio vertical para el contenedor de listas
     alignItems: 'center', // Centrar contenido horizontalmente
+  },
+  listFrame: {
+    width: 50, // Ancho del marco
+    height: 50, // Alto del marco
+    backgroundColor: "#f0f0f0", // Color de fondo (opcional)
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 25, // Redondear bordes
+    overflow: "hidden", // Ocultar contenido excedente
+  },
+  iconImage: {
+    width: "100%", // Ajustar al ancho del contenedor
+    height: "100%", // Ajustar al alto del contenedor
   },
   searchBar: {
     width: width * 0.9, // 90% del ancho de la pantalla
@@ -227,13 +211,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginRight: 10,
   },
-  listFrame: {
-    width: 150,
-    height: 100, // Ajusta la altura según sea necesario
-    borderRadius: 10,
-    backgroundColor: '#e0e0e0', // Fondo gris para los cuadros
-    marginBottom: 5,
-  },
+
   listText: {
     fontSize: 14,
     fontWeight: '500',
@@ -241,8 +219,8 @@ const styles = StyleSheet.create({
   },
   createListButton: {
     backgroundColor: '#fff', // Fondo blanco para el botón
-    paddingVertical: 20, 
-    paddingHorizontal: 20, 
+    paddingVertical: 20,
+    paddingHorizontal: 20,
     borderRadius: 20,
     marginTop: 10, // Acercar el botón a las listas
     alignItems: 'center',

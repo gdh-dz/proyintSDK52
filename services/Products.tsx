@@ -1,6 +1,6 @@
 // services/ProductoListaService.tsx
 import { db } from "@/firebaseConfig";
-import { doc, setDoc, deleteDoc, updateDoc, collection, query, where, getDocs,getDoc  } from "firebase/firestore";
+import { doc, setDoc, deleteDoc, updateDoc, collection, query, where, getDocs,getDoc, addDoc  } from "firebase/firestore";
 import { ProductoLista } from "../models/ProductsList";
 import { Producto } from "../models/Products";
 
@@ -19,7 +19,6 @@ export async function addProducto(nombre: string, category: string, imagenURL: s
   export async function getProductos(): Promise<Producto[]> {
     const productosCollection = collection(db, "productos");
     const querySnapshot = await getDocs(productosCollection);
-    console.log(querySnapshot.docs.map(doc => Producto.fromFirestore(doc)))
     return querySnapshot.docs.map(doc => Producto.fromFirestore(doc));
   }
   
@@ -41,34 +40,34 @@ export async function addProducto(nombre: string, category: string, imagenURL: s
     await deleteDoc(doc(db, "productos", productoId));
   }
 // Añadir un producto a una lista (con cantidad y número de productos)
-export async function addProductoToList(productoLista: ProductoLista, productoListaId: string, cantidad: number): Promise<void> {
-  // Asignar el número total de productos a la lista
-  await setDoc(doc(db, "ProductosLista", productoListaId), {
+export async function addProductoToList(productoLista: ProductoLista, cantidad: number): Promise<void> {
+  await addDoc(collection(db, "ProductosListas"), {
     ...productoLista.toFirestore(),
-    cantidad: cantidad // Añadido el número de productos
+    cantidad: cantidad
   });
 }
 
 // Obtener productos en una lista específica
 export async function getProductosByListId(listaId: string): Promise<ProductoLista[]> {
-  const productosListaQuery = query(collection(db, "ProductosLista"), where("listaId", "==", listaId));
-  const querySnapshot = await getDocs(productosListaQuery);
+  const ProductosListasQuery = query(collection(db, "ProductosListas"), where("listaId", "==", listaId));
+  console.log(ProductosListasQuery)
+  const querySnapshot = await getDocs(ProductosListasQuery);
   return querySnapshot.docs.map(doc => ProductoLista.fromFirestore(doc));
 }
 
 // Modificar un producto en la lista (ej. cantidad o asignación de usuario)
 export async function modifyProductoInList(productoListaId: string, updatedData: Partial<ProductoLista>): Promise<void> {
-  const docRef = doc(db, "ProductosLista", productoListaId);
+  const docRef = doc(db, "ProductosListas", productoListaId);
   await updateDoc(docRef, updatedData);
 }
 
 // Marcar producto como comprado en una lista
 export async function markProductoAsComprado(productoListaId: string): Promise<void> {
-  const docRef = doc(db, "ProductosLista", productoListaId);
+  const docRef = doc(db, "ProductosListas", productoListaId);
   await updateDoc(docRef, { isComprado: true });
 }
 
 // Eliminar un producto de una lista
 export async function deleteProductoFromList(productoListaId: string): Promise<void> {
-  await deleteDoc(doc(db, "ProductosLista", productoListaId));
+  await deleteDoc(doc(db, "ProductosListas", productoListaId));
 }
