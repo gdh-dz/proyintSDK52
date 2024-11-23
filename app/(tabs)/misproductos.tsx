@@ -9,6 +9,14 @@ import { Producto } from '@/models/Products';
   
 
 const ProductScreen: React.FC = () => {
+  const navigateToProductDetails = (productID: string) => {
+    console.log("Sharing List With ID:", productID);
+    router.navigate(`/editarproducto?id=${productID}`)
+    
+    //router.replace(`editarproducto/?id=${productID}`);
+    //    router.replace(`/tabs/confirmaciondecompartido?id=${listId}`);
+
+  };
   const router = useRouter();
   const [productos, setProductos] = useState<Producto[]>([]); // Estado para los productos
 
@@ -40,10 +48,12 @@ const ProductScreen: React.FC = () => {
       <Text style={styles.sectionTitle}>Tus productos</Text>
       <ScrollView contentContainerStyle={styles.productsGrid}>
         {productos.map((product, index) => (
+           <TouchableOpacity onPress={() => navigateToProductDetails(product.id || '')}>
           <View key={index} style={styles.productItem}>
             <Image source={{ uri: product.imagenURL ?? '../../assets/images/favicon.png' }} style={styles.productImage} />
             <Text style={styles.productName}>{product.nombre}</Text>
           </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 
