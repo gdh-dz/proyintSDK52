@@ -1,5 +1,6 @@
 // WiseMarket/app/(tabs)/signup.tsx
 import { createUser } from "@/services/userservices";
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { View, Text, TextInput, Alert, StyleSheet, Image, TouchableOpacity } from "react-native";
 
@@ -20,6 +21,7 @@ export default function SignupScreen() {
     try {
       const user = await createUser(email, password, name, phone);
       Alert.alert("Success", `User ${user.name} created successfully!`);
+      router.navigate('/login')
     } catch (error) {
       Alert.alert("Error", "Failed to create user. Please try again.");
       console.error("Error creating user:", error);

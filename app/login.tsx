@@ -1,14 +1,13 @@
 import { logIn } from "@/services/auth"; // Import the login function
 import React, { useState } from "react";
-import { NavigationContainer } from '@react-navigation/native';
 import { View, Text, TextInput, Alert, StyleSheet, Image, TouchableOpacity, Dimensions } from "react-native";
 import { useNavigation } from "@react-navigation/native"; // Import useNavigation
-import { router } from "expo-router";
+import { router, useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
 
 export default function LoginScreen() {
-  const navigation = useNavigation(); // Initialize navigation
+  const router = useRouter();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -23,8 +22,8 @@ export default function LoginScreen() {
     try {
       await logIn(email, password); // Call the login function
       Alert.alert("Éxito", "Se ha iniciado sesión");
-      router.navigate('/(tabs)')
-     // navigation.navigate("Home"); // Navigate to Explore or your main screen
+      router.navigate('/pantallalistas')
+
     } catch (error) {
       Alert.alert("Error", "No se pudo iniciar la sesión. Intenta de nuevo");
       console.error("Hubo un error iniciando sesión", error);
