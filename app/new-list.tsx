@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, Image, Modal, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { getProductos } from '../services/Products'; // Asegúrate de colocar la ruta correcta al servicio
+import { getProductos } from '../services/products'; // Asegúrate de colocar la ruta correcta al servicio
 import { Producto } from '@/models/Products';
 import { createList } from '@/services/lists';
 import { List } from '@/models/Lists';
