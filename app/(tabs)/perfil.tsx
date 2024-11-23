@@ -1,8 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
+import { router, useRouter } from 'expo-router';
 import { getUserIdFromSession } from '@/services/auth';
-import { getUserById } from '@/services/userservices';
+import { logOut } from '@/services/auth';
+
+const handleLogout = async () => {
+  try {
+    await logOut();
+    console.log("Sesión cerrada", "Has salido exitosamente");
+    router.push('/login');
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+    console.log("Error", "Hubo un problema al cerrar la sesión. Inténtalo de nuevo.");
+  }
+};
 
 const ProfileScreen: React.FC = () => {
   const [user, setUser] = useState<any>(null);
@@ -88,9 +99,9 @@ const ProfileScreen: React.FC = () => {
       >
         <Text style={styles.editarText}>Editar Perfil</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity style={styles.logoutButton}>
+      <TouchableOpacity style={styles.logoutButton}  onPress={handleLogout}>
         <Text style={styles.logoutText}>Cerrar sesión</Text>
+        
       </TouchableOpacity>
     </View>
   );

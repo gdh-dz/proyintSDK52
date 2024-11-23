@@ -5,12 +5,14 @@ import { getProductoById } from '@/services/Products';
 
 const EditProductScreen: React.FC = () => {
   const { id } = useLocalSearchParams();
+
   const [product, setProduct] = useState<any>(null); 
   const [name, setName] = useState('');
   const [category, setCategory] = useState('');
   const [supermarket, setSupermarket] = useState('');
   const [price, setPrice] = useState('');
   const idString = Array.isArray(id) ? id[0] : id;
+
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -28,6 +30,7 @@ const EditProductScreen: React.FC = () => {
           }
         } catch (error) {
           console.log('Error al cargar el producto');
+
         }
       }
     };
@@ -39,6 +42,7 @@ const EditProductScreen: React.FC = () => {
   
     console.log("Producto actualizado:", { name, category, supermarket, price });
     console.log('Cambios guardados');
+
   };
 
   if (!product) {
