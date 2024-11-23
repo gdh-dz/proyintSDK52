@@ -7,7 +7,9 @@ import { useEffect } from 'react';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import React from 'react';
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// Importar el UserProvider
+import { UserProvider } from './(tabs)/context/UserContext'; // Ajusta la ruta si es necesario
+
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -27,18 +29,17 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="agregarproducto" options={{ title: "Mis productos" }} />
-        <Stack.Screen name="IconSelectionScreen" options={{ title: "Agregar Producto" }} />
-
-        <Stack.Screen name="homescreen" options={{ title: "Homescreen" }} />
-        <Stack.Screen name="new-list" options={{ title: "Crear Nueva Lista" }} />
-
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-        
-      </Stack>
-    </ThemeProvider>
+    <UserProvider> {/* Envolver el ThemeProvider y Stack en UserProvider */}
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <Stack>
+          <Stack.Screen name="agregarproducto" options={{ title: "Mis productos" }} />
+          <Stack.Screen name="IconSelectionScreen" options={{ title: "Agregar Producto" }} />
+          <Stack.Screen name="homescreen" options={{ title: "Homescreen" }} />
+          <Stack.Screen name="new-list" options={{ title: "Crear Nueva Lista" }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="+not-found" />
+        </Stack>
+      </ThemeProvider>
+    </UserProvider>
   );
 }

@@ -1,7 +1,7 @@
-// WiseMarket/app/(tabs)/signup.tsx
 import { createUser } from "@/services/userservices";
 import React, { useState } from "react";
 import { View, Text, TextInput, Alert, StyleSheet, Image, TouchableOpacity } from "react-native";
+import { useRouter } from "expo-router"; // Importar para navegación
 
 export default function SignupScreen() {
   const [email, setEmail] = useState<string>("");
@@ -9,6 +9,7 @@ export default function SignupScreen() {
   const [name, setName] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter(); // Usar el hook para navegación
 
   const handleRegister = async () => {
     if (!email || !password || !name || !phone) {
@@ -20,6 +21,9 @@ export default function SignupScreen() {
     try {
       const user = await createUser(email, password, name, phone);
       Alert.alert("Success", `User ${user.name} created successfully!`);
+
+      // Redirigir a la pantalla de Log In
+      router.push("/login"); // Aquí se cambia a la ruta de la pantalla de inicio de sesión
     } catch (error) {
       Alert.alert("Error", "Failed to create user. Please try again.");
       console.error("Error creating user:", error);
@@ -48,14 +52,14 @@ export default function SignupScreen() {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
-            placeholderTextColor="#A8A8A8" // Cambia el color del placeholder aquí
+            placeholderTextColor="#A8A8A8"
           />
           <TextInput
             style={styles.input}
             placeholder="Nombre"
             value={name}
             onChangeText={setName}
-            placeholderTextColor="#A8A8A8" // Cambia el color del placeholder aquí
+            placeholderTextColor="#A8A8A8"
           />
           <TextInput
             style={styles.input}
@@ -63,7 +67,7 @@ export default function SignupScreen() {
             value={phone}
             onChangeText={setPhone}
             keyboardType="phone-pad"
-            placeholderTextColor="#A8A8A8" // Cambia el color del placeholder aquí
+            placeholderTextColor="#A8A8A8"
           />
           <TextInput
             style={styles.input}
@@ -71,13 +75,13 @@ export default function SignupScreen() {
             value={password}
             onChangeText={setPassword}
             secureTextEntry
-            placeholderTextColor="#A8A8A8" // Cambia el color del placeholder aquí
+            placeholderTextColor="#A8A8A8"
           />
         </View>
         <TouchableOpacity
           style={[styles.registerButton, { opacity: loading ? 0.6 : 1 }]}
           onPress={loading ? undefined : handleRegister}
-          disabled={loading} // Deshabilita el botón mientras se registra
+          disabled={loading}
         >
           <Text style={styles.registerButtonText}>
             {loading ? "Registrando..." : "Registrar"}
@@ -105,15 +109,14 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   outerFrame: {
-    width: '85%', // Cambia de '90%' a '85%' para reducir el ancho
-    maxWidth: 310, // Reduce aún más el ancho máximo si es necesario
+    width: '85%', 
+    maxWidth: 310, 
     paddingVertical: 25,
     paddingHorizontal: 15,
     backgroundColor: "rgba(37, 104, 71, .9)",
     borderRadius: 20,
     alignItems: "center",
   },
-  
   switchButton: {
     height: 40,
     justifyContent: "center",
@@ -129,7 +132,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: "400", // Asegúrate de usar "400" o "normal"
+    fontWeight: "400",
     textAlign: "center",
     marginBottom: 41,
     color: "#FFFF",
@@ -146,7 +149,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 16,
     backgroundColor: "#fff",
-    fontSize: 16, // Asegúrate de que el tamaño de la fuente no sea muy pequeño
+    fontSize: 16,
   },
   registerButton: {
     borderRadius: 20,
