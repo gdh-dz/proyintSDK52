@@ -21,8 +21,9 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await logIn(email, password); // Call the login function
+      router.navigate('/(tabs)/perfil')
       Alert.alert("Éxito", "Se ha iniciado sesión");
-      router.navigate('/pantallalistas')
+      
 
     } catch (error) {
       Alert.alert("Error", "No se pudo iniciar la sesión. Intenta de nuevo");
@@ -40,9 +41,10 @@ export default function LoginScreen() {
         resizeMode="cover"
       />
       <View style={styles.outerFrame}>
-        <TouchableOpacity style={styles.switchButton}>
-          <Text style={styles.switchButtonText}>Log In / Sign Up</Text>
-        </TouchableOpacity>
+      <TouchableOpacity style={styles.switchButton} 
+      onPress={() => router.push('/signup')}>
+      <Text style={styles.switchButtonText}>Log In / Sign Up</Text>
+      </TouchableOpacity>
         <Text style={styles.title}>¡Bienvenido!</Text>
         <View style={styles.inputContainer}>
           <TextInput

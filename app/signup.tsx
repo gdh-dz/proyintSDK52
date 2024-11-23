@@ -38,9 +38,10 @@ export default function SignupScreen() {
         resizeMode="cover"
       />
       <View style={styles.outerFrame}>
-        <TouchableOpacity style={styles.switchButton}>
-          <Text style={styles.switchButtonText}>Log In / Sign Up</Text>
-        </TouchableOpacity>
+      <TouchableOpacity style={styles.switchButton} 
+      onPress={() => router.push('/login')}>
+      <Text style={styles.switchButtonText}>Log In / Sign Up</Text>
+      </TouchableOpacity>
         <Text style={styles.title}>¡Bienvenido!</Text>
         <View style={styles.inputContainer}>
           <TextInput
