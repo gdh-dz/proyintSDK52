@@ -137,6 +137,7 @@ export async function createList(list: List, productos: string[]): Promise<void>
     // Crear objetos ProductoLista por cada producto seleccionado
     for (const productoId of productos) {
       const nuevoProductoLista = new ProductoLista(
+        null,
         productoId, // ID del producto
         1, // Cantidad inicial
         listaId, // ID de la lista a la que pertenece el producto
@@ -166,4 +167,20 @@ export async function deleteList(listId: string): Promise<void> {
 export async function modifyList(listId: string, updatedData: Partial<List>): Promise<void> {
   const docRef = doc(db, "Listas", listId);
   await updateDoc(docRef, updatedData);
+}
+export async function getRandomIconUrl(): Promise<string | null> {
+  try {
+    const iconsCollection = collection(db, "IconsListas");
+    const snapshot = await getDocs(iconsCollection);
+
+    if (!snapshot.empty) {
+      const icons = snapshot.docs.map(doc => doc.data().IconUrl);
+      const randomIndex = Math.floor(Math.random() * icons.length);
+      return icons[randomIndex]; // Retorna una URL aleatoria
+    }
+    return null; // No hay íconos disponibles
+  } catch (error) {
+    console.error("Error al obtener íconos: ", error);
+    return null;
+  }
 }

@@ -1,7 +1,7 @@
 // services/userService.ts
 import { User } from "@/models/User";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, UserCredential } from "firebase/auth"; // Asegúrate de importar signInWithEmailAndPassword
-import { setDoc, doc } from "firebase/firestore";
+import { setDoc, doc, getDoc } from "firebase/firestore";
 import { app,db } from "@/firebaseConfig";
 
 // Inicializa Firebase Authentication y Firestore usando la instancia de la app
@@ -48,4 +48,12 @@ export async function createUser(email: string, password: string, name: string, 
     console.error("Error creating user:", error);
     throw new Error(`Error creating user: ${error}`); // Lanza un error más específico
   }
+
+ 
+}
+
+export async function getUserById(userID: string): Promise<User | null> {
+  const docRef = doc(db, "users", userID);
+  const docSnap = await getDoc(docRef);
+  return docSnap.exists() ? User.fromFirestore(docSnap) : null;
 }

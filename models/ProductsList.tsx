@@ -5,14 +5,17 @@ import { getFirestore } from "firebase/firestore";
 const db = getFirestore(app);
 
 export class ProductoLista {
+  id?: string; // Propiedad opcional para almacenar el ID de la lista
   productoId: string | null;       // ID de referencia al Producto
   cantidad: number | null;
   listaId: string | null;          // ID de la lista a la que pertenece el producto
   isComprado: boolean | null;      // Estado de compra del producto
   usuarioAsignado: string | null;  // Usuario responsable de comprar este producto
   fechaActualizacion: Date | null;
+  price: any;
 
   constructor(
+    id: string | null = null, // Agregar el id al constructor como opcional
     productoId: string | null = null,
     cantidad: number | null = null,
     listaId: string | null = null,
@@ -20,6 +23,7 @@ export class ProductoLista {
     usuarioAsignado: string | null = null,
     fechaActualizacion: Date | null = null
   ) {
+    this.id = id ?? undefined;
     this.productoId = productoId;
     this.cantidad = cantidad;
     this.listaId = listaId;
@@ -49,6 +53,7 @@ export class ProductoLista {
   static fromFirestore(snapshot: QueryDocumentSnapshot): ProductoLista {
     const data = snapshot.data();
     return new ProductoLista(
+      snapshot.id, // Asignar el ID del documento Firestore a la propiedad id
       data.productoId ?? null,
       data.cantidad ?? null,
       data.listaId ?? null,
